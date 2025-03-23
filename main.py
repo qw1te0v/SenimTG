@@ -1,32 +1,17 @@
-from aiohttp import web
 import asyncio
+import os
 from aiogram import Bot, Dispatcher
 from app.handlers import router
 
-async def handle(request):
-    return web.Response(text="Bot is running!")
+# Получаем токен из переменной окружения для безопасности (советую для Render)
+TOKEN = os.getenv('BOT_TOKEN', '8062754523:AAFD-voY39Qmo9450AqeAJWLyNO0X9z6A34')  # Для локального запуска можешь временно вставить токен сюда
 
 async def main():
-    bot = Bot(token='ТВОЙ_ТОКЕН')
+    bot = Bot(token=TOKEN)
     dp = Dispatcher()
     dp.include_router(router)
-
-    # aiohttp server
-    app = web.Application()
-    app.router.add_get("/", handle)  # отвечает UptimeRobot
-    
-    runner = web.AppRunner(app)
-    await runner.setup()
-    site = web.TCPSite(runner, port=8080)
-    await site.start()
-    
-    # запускаем бота
-    loop = asyncio.get_running_loop()
-    loop.create_task(dp.start_polling(bot))
-
-    print("Bot and server started!")
-
-    await asyncio.Event().wait()
+    print("Bot is starting...")  # Для проверки в логах Render
+    await dp.start_polling(bot)
 
 if __name__ == '__main__':
     asyncio.run(main())
