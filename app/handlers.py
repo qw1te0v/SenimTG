@@ -10,7 +10,7 @@ import app.keyboards as kb
 
 router = Router()
 
-ADMIN_ID = 1565088807  # Сюда вставь свой Telegram ID
+ADMIN_ID = 1565088807 
 
 admin_kb = ReplyKeyboardMarkup(
     keyboard=[
@@ -28,7 +28,7 @@ async def log_message(message: Message):
 
 @router.message(CommandStart())
 async def start(message: Message):
-    await log_message(message)  # Логируем сообщение
+    await log_message(message)  
     await message.answer('Sigmo', reply_markup=kb.main)
 
 
@@ -52,7 +52,7 @@ async def list_users(message: Message):
 async def list_messages(message: Message):
     if message.from_user.id == ADMIN_ID:
         msgs = await database.get_messages()
-        text = "\n".join([f"ID:{uid} | {time} | {text}" for uid, text, time in msgs[-10:]])  # последние 10 сообщений
+        text = "\n".join([f"ID:{uid} | {time} | {text}" for uid, text, time in msgs[-100:]])  # последние 10 сообщений
         await message.answer(f"Последние сообщения:\n{text}" if text else "Нет сообщений.")
     else:
         await message.answer("Нет доступа!")
