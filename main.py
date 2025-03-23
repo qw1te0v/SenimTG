@@ -1,17 +1,36 @@
 import asyncio
-import os
 from aiogram import Bot, Dispatcher
 from app.handlers import router
+import os
+from aiohttp import web
 
-# Получаем токен из переменной окружения для безопасности (советую для Render)
-TOKEN = os.getenv('BOT_TOKEN', 'ТВОЙ_ТОКЕН_ЗДЕСЬ')  # Для локального запуска можешь временно вставить токен сюда
+TOKEN = os.getenv("BOT_TOKEN")  # Бот токен берем из переменной окружения
 
 async def main():
     bot = Bot(token=TOKEN)
     dp = Dispatcher()
     dp.include_router(router)
-    print("Bot is starting...")  # Для проверки в логах Render
-    await dp.start_polling(bot)
+
+    # Запуск polling
+    asyncio.create_task(dp.start_polling(bot))
+
+    # Запускаем заглушку веб-сервера
+    async def handle(request):
+        return web.Response(text="Bot is running!")
+
+    app = web.Application()
+    app.router.add_get("/", handle)
+
+    runner = web.AppRunner(app)
+    await runner.setup()
+    port = int(os.environ.get("PORT", 8080))
+    site = web.TCPSite(runner, port=port)
+    await site.start()
+
+    print(f"Bot and web server started on port {port}")
+    # Чтобы приложение не завершалось
+    while True:
+        await asyncio.sleep(3600)
 
 if __name__ == '__main__':
     asyncio.run(main())
