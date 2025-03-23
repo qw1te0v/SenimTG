@@ -5,20 +5,17 @@ from app.handlers import router
 import os
 from aiohttp import web
 
-TOKEN = os.getenv("BOT_TOKEN")  # Бот токен берем из переменной окружения
+TOKEN = os.getenv("BOT_TOKEN") 
 
 async def main():
     bot = Bot(token=TOKEN)
     dp = Dispatcher()
     dp.include_router(router)
 
-    # ИНИЦИАЛИЗАЦИЯ БАЗЫ ДАННЫХ
     await database.init_db()
 
-    # Запуск polling
     asyncio.create_task(dp.start_polling(bot))
 
-    # Заглушка веб-сервера для Render
     async def handle(request):
         return web.Response(text="Bot is running!")
 
@@ -32,7 +29,6 @@ async def main():
     await site.start()
 
     print(f"Bot and web server started on port {port}")
-    # Чтобы приложение не завершалось
     while True:
         await asyncio.sleep(3600)
 
