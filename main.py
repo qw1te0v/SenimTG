@@ -4,7 +4,7 @@ from aiogram import Bot, Dispatcher
 from app.handlers import router
 
 # Получаем токен из переменной окружения для безопасности (советую для Render)
-TOKEN = os.getenv('BOT_TOKEN', '8062754523:AAFD-voY39Qmo9450AqeAJWLyNO0X9z6A34')  # Для локального запуска можешь временно вставить токен сюда
+TOKEN = os.getenv('BOT_TOKEN', 'ТВОЙ_ТОКЕН_ЗДЕСЬ')  # Для локального запуска можешь временно вставить токен сюда
 
 async def main():
     bot = Bot(token=TOKEN)
