@@ -1,24 +1,61 @@
 import asyncio
 from aiogram import F, Router
-from aiogram.types import Message
+from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.filters import CommandStart, Command
 import datetime
 
+from app import database
 import app.keyboards as kb
 
 
 router = Router()
 
+ADMIN_ID = 1565088807  # Сюда вставь свой Telegram ID
+
+admin_kb = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text='Список пользователей')],
+        [KeyboardButton(text='Логи сообщений')],
+    ],
+    resize_keyboard=True
+)
+
 # Функция для записи сообщений в файл
 async def log_message(message: Message):
-    with open("messages_log.txt", "a", encoding="utf-8") as file:
-        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        file.write(f"{timestamp} @{message.from_user.username}: {message.text}\n")
+    await database.add_user(message.from_user.id, message.from_user.username)
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    await database.log_message(message.from_user.id, message.text, timestamp)
 
 @router.message(CommandStart())
 async def start(message: Message):
     await log_message(message)  # Логируем сообщение
     await message.answer('Sigmo', reply_markup=kb.main)
+
+
+@router.message(Command("admin"))
+async def admin_panel(message: Message):
+    if message.from_user.id == ADMIN_ID:
+        await message.answer("Добро пожаловать в админ-панель!", reply_markup=admin_kb)
+    else:
+        await message.answer("У тебя нет доступа!")
+
+@router.message(F.text == 'Список пользователей')
+async def list_users(message: Message):
+    if message.from_user.id == ADMIN_ID:
+        users = await database.get_users()
+        text = "\n".join([f"{user_id} @{username}" for user_id, username in users])
+        await message.answer(f"Пользователи:\n{text}" if text else "Пользователей нет.")
+    else:
+        await message.answer("Нет доступа!")
+
+@router.message(F.text == 'Логи сообщений')
+async def list_messages(message: Message):
+    if message.from_user.id == ADMIN_ID:
+        msgs = await database.get_messages()
+        text = "\n".join([f"ID:{uid} | {time} | {text}" for uid, text, time in msgs[-10:]])  # последние 10 сообщений
+        await message.answer(f"Последние сообщения:\n{text}" if text else "Нет сообщений.")
+    else:
+        await message.answer("Нет доступа!")
 
 #---------------------RU---------------------   
 

@@ -1,3 +1,4 @@
+from app import database
 import asyncio
 from aiogram import Bot, Dispatcher
 from app.handlers import router
@@ -11,10 +12,13 @@ async def main():
     dp = Dispatcher()
     dp.include_router(router)
 
+    # ИНИЦИАЛИЗАЦИЯ БАЗЫ ДАННЫХ
+    await database.init_db()
+
     # Запуск polling
     asyncio.create_task(dp.start_polling(bot))
 
-    # Запускаем заглушку веб-сервера
+    # Заглушка веб-сервера для Render
     async def handle(request):
         return web.Response(text="Bot is running!")
 
